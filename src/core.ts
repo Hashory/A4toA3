@@ -12,6 +12,11 @@ export class ConvertA4toA3NoPagesError extends CustomError {}
 export class ConvertA4toA3NotA4SizeError extends CustomError {}
 
 /**
+ * Error thrown when the PDF pages have mismatched orientations.
+ */
+export class ConvertA4toA3MismatchedOrientationError extends CustomError {}
+
+/**
  * Convert an A4 PDF to an A3 (2-up) PDF
  * @param src Uint8Array | ArrayBuffer
  * @param mode "single" | "double-long" | "double-short"
@@ -32,19 +37,31 @@ export async function convertA4toA3(
 		throw new ConvertA4toA3NoPagesError("The PDF contains no pages.");
 	}
 
-	// **Check** if all pages are A4 size
+	// **Check** if all pages are A4 size and have the same orientation
 	const [A4_WIDTH, A4_HEIGHT] = PageSizes.A4;
 	const TOLERANCE = 2; // points, to allow for rounding errors
+	let firstPageIsPortrait: boolean | undefined = undefined;
 
 	for (const page of a4Pages) {
 		const { width, height } = page.getSize();
-		const isA4 =
-			(Math.abs(width - A4_WIDTH) < TOLERANCE &&
-				Math.abs(height - A4_HEIGHT) < TOLERANCE) ||
-			(Math.abs(width - A4_HEIGHT) < TOLERANCE &&
-				Math.abs(height - A4_WIDTH) < TOLERANCE);
-		if (!isA4) {
+		const isA4Portrait =
+			Math.abs(width - A4_WIDTH) < TOLERANCE &&
+			Math.abs(height - A4_HEIGHT) < TOLERANCE;
+		const isA4Landscape =
+			Math.abs(width - A4_HEIGHT) < TOLERANCE &&
+			Math.abs(height - A4_WIDTH) < TOLERANCE;
+
+		if (!isA4Portrait && !isA4Landscape) {
 			throw new ConvertA4toA3NotA4SizeError("The PDF is not A4 size.");
+		}
+
+		const currentPageIsPortrait = height > width;
+		if (firstPageIsPortrait === undefined) {
+			firstPageIsPortrait = currentPageIsPortrait;
+		} else if (firstPageIsPortrait !== currentPageIsPortrait) {
+			throw new ConvertA4toA3MismatchedOrientationError(
+				"All pages in the PDF must have the same orientation (all portrait or all landscape).",
+			);
 		}
 	}
 
