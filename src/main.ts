@@ -2,6 +2,7 @@ import {
 	convertA4toA3,
 	ConvertA4toA3NoPagesError,
 	ConvertA4toA3NotA4SizeError,
+	ConvertA4toA3MismatchedOrientationError,
 } from "./core";
 
 const pdfFileInput = document.getElementById("pdfFile") as HTMLInputElement;
@@ -88,15 +89,22 @@ convertButton.addEventListener("click", async () => {
 				link.addEventListener("click", () => {
 					setTimeout(() => URL.revokeObjectURL(url), 100);
 				});
-			} catch (err: any) {
+			} catch (err: unknown) {
 				console.error("PDF処理エラー:", err);
 				if (err instanceof ConvertA4toA3NoPagesError) {
 					statusDiv.textContent = "PDFにページがありません。";
 				} else if (err instanceof ConvertA4toA3NotA4SizeError) {
 					statusDiv.textContent =
 						"A4サイズ以外のページが含まれています。A4サイズのみ対応しています。";
+				} else if (err instanceof ConvertA4toA3MismatchedOrientationError) {
+					statusDiv.textContent =
+						"ページの向きが一致しません。すべてのページが同じ向きである必要があります。";
 				} else {
-					statusDiv.textContent = `エラーが発生しました: ${err.message}`;
+					statusDiv.textContent =
+						"エラーが発生しました: " +
+						(typeof err === "object" && err !== null && "message" in err
+							? (err as { message?: string }).message
+							: String(err));
 				}
 				statusDiv.className = "status text-red-600";
 			} finally {
@@ -114,9 +122,13 @@ convertButton.addEventListener("click", async () => {
 			loader.style.display = "none";
 			buttonText.textContent = "変換してA3 PDFを作成";
 		};
-	} catch (err: any) {
+	} catch (err: unknown) {
 		console.error("予期せぬエラー:", err);
-		statusDiv.textContent = `予期せぬエラーが発生しました: ${err.message}`;
+		statusDiv.textContent =
+			"予期せぬエラーが発生しました: " +
+			(typeof err === "object" && err !== null && "message" in err
+				? (err as { message?: string }).message
+				: String(err));
 		statusDiv.className = "status text-red-600";
 		convertButton.disabled = false;
 		loader.style.display = "none";

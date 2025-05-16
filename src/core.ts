@@ -1,4 +1,4 @@
-import { PDFDocument, PageSizes, degrees, type PDFPage } from "pdf-lib";
+import { PDFDocument, PageSizes, degrees, type PDFPage, type Rotation } from "pdf-lib";
 import { CustomError } from "ts-custom-error";
 
 /**
@@ -10,6 +10,11 @@ export class ConvertA4toA3NoPagesError extends CustomError {}
  * Error thrown when the PDF is not A4 size during A4 to A3 conversion.
  */
 export class ConvertA4toA3NotA4SizeError extends CustomError {}
+
+/**
+ * Error thrown when the PDF pages have mismatched orientations.
+ */
+export class ConvertA4toA3MismatchedOrientationError extends CustomError {}
 
 /**
  * Convert an A4 PDF to an A3 (2-up) PDF
@@ -32,19 +37,31 @@ export async function convertA4toA3(
 		throw new ConvertA4toA3NoPagesError("The PDF contains no pages.");
 	}
 
-	// **Check** if all pages are A4 size
+	// **Check** if all pages are A4 size and have the same orientation
 	const [A4_WIDTH, A4_HEIGHT] = PageSizes.A4;
 	const TOLERANCE = 2; // points, to allow for rounding errors
+	let firstPageIsPortrait: boolean | undefined = undefined;
 
 	for (const page of a4Pages) {
 		const { width, height } = page.getSize();
-		const isA4 =
-			(Math.abs(width - A4_WIDTH) < TOLERANCE &&
-				Math.abs(height - A4_HEIGHT) < TOLERANCE) ||
-			(Math.abs(width - A4_HEIGHT) < TOLERANCE &&
-				Math.abs(height - A4_WIDTH) < TOLERANCE);
-		if (!isA4) {
+		const isA4Portrait =
+			Math.abs(width - A4_WIDTH) < TOLERANCE &&
+			Math.abs(height - A4_HEIGHT) < TOLERANCE;
+		const isA4Landscape =
+			Math.abs(width - A4_HEIGHT) < TOLERANCE &&
+			Math.abs(height - A4_WIDTH) < TOLERANCE;
+
+		if (!isA4Portrait && !isA4Landscape) {
 			throw new ConvertA4toA3NotA4SizeError("The PDF is not A4 size.");
+		}
+
+		const currentPageIsPortrait = height > width;
+		if (firstPageIsPortrait === undefined) {
+			firstPageIsPortrait = currentPageIsPortrait;
+		} else if (firstPageIsPortrait !== currentPageIsPortrait) {
+			throw new ConvertA4toA3MismatchedOrientationError(
+				"All pages in the PDF must have the same orientation (all portrait or all landscape).",
+			);
 		}
 	}
 
@@ -63,24 +80,49 @@ export async function convertA4toA3(
 		const embedded = await a3PdfDoc.embedPage(a4Page);
 		const dims = embedded.scale(1.0);
 
-		let x = pos === "left" ? 0 : A3_HEIGHT - dims.width;
-		let y = 0;
-		let rotate = undefined;
+		const isPortrait = firstPageIsPortrait ?? true;
+		const a3Width = isPortrait ? A3_HEIGHT : A3_WIDTH;
+		const a3Height = isPortrait ? A3_WIDTH : A3_HEIGHT;
 
-		if (rot180 !== undefined) {
-			x = pos === "left" ? A3_HEIGHT - dims.width : A3_HEIGHT;
-			y = A3_WIDTH;
-			rotate = degrees(180);
+		let x: number, y: number, rotate: Rotation | undefined;
+
+		if (isPortrait) {
+			// A4 Portrait -> A3 Landscape
+			if (rot180) {
+				x = pos === "left" ? a3Width - dims.width : a3Width;
+				y = a3Height;
+				rotate = degrees(180);
+			} else {
+				x = pos === "left" ? 0 : a3Width - dims.width;
+				y = 0;
+				rotate = undefined;
+			}
+		} else {
+			// A4 Landscape -> A3 Portrait
+			if (rot180) {
+				x = a3Width;
+				y = pos === "left" ? a3Height - dims.height : 0;
+				rotate = degrees(180);
+			} else {
+				x = 0;
+				y = pos === "left" ? 0 : a3Height - dims.height;
+				rotate = undefined;
+			}
 		}
 
 		a3Page.drawPage(embedded, { ...dims, x, y, rotate });
 	};
 
+	const isPortrait = firstPageIsPortrait ?? true;
+	const a3PageSize: [number, number] = isPortrait
+		? [A3_HEIGHT, A3_WIDTH] // A3 Landscape
+		: [A3_WIDTH, A3_HEIGHT]; // A3 Portrait
+
 	switch (mode) {
 		case "single":
 			// Single mode: A4 pages are placed on A3 pages
 			for (let i = 0; i < pageCount; i += 2) {
-				const a3 = a3PdfDoc.addPage([A3_HEIGHT, A3_WIDTH]);
+				const a3 = a3PdfDoc.addPage(a3PageSize);
 				await draw(a3, a4Pages[i], "left");
 				if (i + 1 < pageCount) await draw(a3, a4Pages[i + 1], "right");
 			}
@@ -89,14 +131,14 @@ export async function convertA4toA3(
 			// double-long mode:
 			// When printing double-sided and cutting an A3 sheet in two, align the long edge.
 			for (let i = 0; i < pageCount; i += 4) {
-				const front = a3PdfDoc.addPage([A3_HEIGHT, A3_WIDTH]);
-				await draw(front, a4Pages[i], "left");
+				const front = a3PdfDoc.addPage(a3PageSize);
+				await draw(front, a4Pages[i], "left"); // p1
+				if (i + 2 < pageCount) await draw(front, a4Pages[i + 2], "right"); // p3
 
 				if (i + 1 < pageCount) {
-					const back = a3PdfDoc.addPage([A3_HEIGHT, A3_WIDTH]);
-					await draw(back, a4Pages[i + 1], "left");
-					if (i + 2 < pageCount) await draw(front, a4Pages[i + 2], "right");
-					if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right");
+					const back = a3PdfDoc.addPage(a3PageSize);
+					await draw(back, a4Pages[i + 1], "left"); // p2
+					if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
 				}
 			}
 			break;
@@ -104,15 +146,15 @@ export async function convertA4toA3(
 			// double-short mode:
 			// When printing double-sided and cutting an A3 sheet in two, align the short edge.
 			for (let i = 0; i < pageCount; i += 4) {
-				const front = a3PdfDoc.addPage([A3_HEIGHT, A3_WIDTH]);
-				await draw(front, a4Pages[i], "left");
+				const front = a3PdfDoc.addPage(a3PageSize);
+				await draw(front, a4Pages[i], "left"); // p1
+				if (i + 2 < pageCount) await draw(front, a4Pages[i + 2], "right"); // p3
 
 				if (i + 1 < pageCount) {
-					const back = a3PdfDoc.addPage([A3_HEIGHT, A3_WIDTH]);
-					await draw(back, a4Pages[i + 1], "left", "rot180");
-					if (i + 2 < pageCount) await draw(front, a4Pages[i + 2], "right");
+					const back = a3PdfDoc.addPage(a3PageSize);
+					await draw(back, a4Pages[i + 1], "left", "rot180"); // p2
 					if (i + 3 < pageCount)
-						await draw(back, a4Pages[i + 3], "right", "rot180");
+						await draw(back, a4Pages[i + 3], "right", "rot180"); // p4
 				}
 			}
 			break;
