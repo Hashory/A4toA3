@@ -101,7 +101,7 @@ export async function convertA4toA3(
 			// A4 Landscape -> A3 Portrait
 			if (rot180) {
 				x = a3Width;
-				y = pos === "left" ? a3Height - dims.height : 0;
+				y = pos === "left" ? a3Height : a3Height - dims.height;
 				rotate = degrees(180);
 			} else {
 				x = 0;
@@ -137,8 +137,14 @@ export async function convertA4toA3(
 
 				if (i + 1 < pageCount) {
 					const back = a3PdfDoc.addPage(a3PageSize);
-					await draw(back, a4Pages[i + 1], "left"); // p2
-					if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
+					if (isPortrait) {
+						await draw(back, a4Pages[i + 1], "left"); // p2
+						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
+					} else {
+						await draw(back, a4Pages[i + 1], "right", "rot180"); // p2
+						if (i + 3 < pageCount)
+							await draw(back, a4Pages[i + 3], "left", "rot180"); // p4
+					}
 				}
 			}
 			break;
@@ -152,9 +158,14 @@ export async function convertA4toA3(
 
 				if (i + 1 < pageCount) {
 					const back = a3PdfDoc.addPage(a3PageSize);
-					await draw(back, a4Pages[i + 1], "left", "rot180"); // p2
-					if (i + 3 < pageCount)
-						await draw(back, a4Pages[i + 3], "right", "rot180"); // p4
+					if (isPortrait) {
+						await draw(back, a4Pages[i + 1], "left", "rot180"); // p2
+						if (i + 3 < pageCount)
+							await draw(back, a4Pages[i + 3], "right", "rot180"); // p4
+					} else {
+						await draw(back, a4Pages[i + 1], "left"); // p2
+						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
+					}
 				}
 			}
 			break;
