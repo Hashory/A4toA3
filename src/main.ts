@@ -1,8 +1,8 @@
 import {
-	convertA4toA3,
+	ConvertA4toA3MismatchedOrientationError,
 	ConvertA4toA3NoPagesError,
 	ConvertA4toA3NotA4SizeError,
-	ConvertA4toA3MismatchedOrientationError,
+	convertA4toA3,
 } from "./core";
 
 const pdfFileInput = document.getElementById("pdfFile") as HTMLInputElement;

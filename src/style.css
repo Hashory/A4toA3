@@ -46,7 +46,10 @@ body {
 	font-weight: 500;
 	font-size: 0.98rem;
 	text-decoration: none;
-	transition: background 0.18s, border 0.18s, color 0.18s;
+	transition:
+		background 0.18s,
+		border 0.18s,
+		color 0.18s;
 	box-shadow: 0 1px 4px rgba(30, 64, 175, 0.04);
 }
 
@@ -139,7 +142,9 @@ body {
 	padding: 0.5rem;
 	background: #f9fafb;
 	cursor: pointer;
-	transition: border-color 0.2s, box-shadow 0.2s;
+	transition:
+		border-color 0.2s,
+		box-shadow 0.2s;
 }
 
 .file-input:focus {

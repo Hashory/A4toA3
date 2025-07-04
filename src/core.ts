@@ -1,4 +1,10 @@
-import { PDFDocument, PageSizes, degrees, type PDFPage, type Rotation } from "pdf-lib";
+import {
+	degrees,
+	PageSizes,
+	PDFDocument,
+	type PDFPage,
+	type Rotation,
+} from "pdf-lib";
 import { CustomError } from "ts-custom-error";
 
 /**
@@ -40,7 +46,7 @@ export async function convertA4toA3(
 	// **Check** if all pages are A4 size and have the same orientation
 	const [A4_WIDTH, A4_HEIGHT] = PageSizes.A4;
 	const TOLERANCE = 2; // points, to allow for rounding errors
-	let firstPageIsPortrait: boolean | undefined = undefined;
+	let firstPageIsPortrait: boolean | undefined;
 
 	for (const page of a4Pages) {
 		const { width, height } = page.getSize();
@@ -84,7 +90,9 @@ export async function convertA4toA3(
 		const a3Width = isPortrait ? A3_HEIGHT : A3_WIDTH;
 		const a3Height = isPortrait ? A3_WIDTH : A3_HEIGHT;
 
-		let x: number, y: number, rotate: Rotation | undefined;
+		let x: number;
+		let y: number;
+		let rotate: Rotation | undefined;
 
 		if (isPortrait) {
 			// A4 Portrait -> A3 Landscape

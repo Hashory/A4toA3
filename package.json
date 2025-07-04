@@ -5,10 +5,11 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"biome": "biome check --write"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.0.0-beta.1",
+		"@biomejs/biome": "^2.0.6",
 		"typescript": "~5.7.2",
 		"vite": "^6.3.1"
 	},
