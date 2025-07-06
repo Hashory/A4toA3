@@ -18,12 +18,18 @@ importers:
       '@biomejs/biome':
         specifier: ^2.0.6
         version: 2.0.6
+      '@types/node':
+        specifier: ^24.0.10
+        version: 24.0.10
       typescript:
         specifier: ~5.7.2
         version: 5.7.3
       vite:
         specifier: ^6.3.1
-        version: 6.3.1
+        version: 6.3.1(@types/node@24.0.10)
+      vite-plugin-sitemap:
+        specifier: ^0.8.2
+        version: 0.8.2
 
 packages:
 
@@ -339,6 +345,9 @@ packages:
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
 
+  '@types/node@24.0.10':
+    resolution: {integrity: sha512-ENHwaH+JIRTDIEEbDK6QSQntAYGtbvdDXnMXnZaZ6k13Du1dPMmprkEHIL7ok2Wl2aZevetwTAb5S+7yIF+enA==}
+
   esbuild@0.25.2:
     resolution: {integrity: sha512-16854zccKPnC+toMywC+uKNeYSv+/eXkevRAfwRD/G9Cleq66m8XFIrigkbvauLLlCfDL45Q2cWegSg53gGBnQ==}
     engines: {node: '>=18'}
@@ -403,6 +412,12 @@ packages:
     resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  undici-types@7.8.0:
+    resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
+
+  vite-plugin-sitemap@0.8.2:
+    resolution: {integrity: sha512-bqIw6NVOXg6je81lzX8Lm0vjf8/QSAp8di8fYQzZ3ZdVicOm8+6idBGALJiy1R1FiXNIK8rgORO6HBqXyHW+iQ==}
 
   vite@6.3.1:
     resolution: {integrity: sha512-kkzzkqtMESYklo96HKKPE5KKLkC1amlsqt+RjFMlX2AvbRB/0wghap19NdBxxwGZ+h/C6DLCrcEphPIItlGrRQ==}
@@ -626,6 +641,10 @@ snapshots:
 
   '@types/estree@1.0.7': {}
 
+  '@types/node@24.0.10':
+    dependencies:
+      undici-types: 7.8.0
+
   esbuild@0.25.2:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.25.2
@@ -721,7 +740,11 @@ snapshots:
 
   typescript@5.7.3: {}
 
-  vite@6.3.1:
+  undici-types@7.8.0: {}
+
+  vite-plugin-sitemap@0.8.2: {}
+
+  vite@6.3.1(@types/node@24.0.10):
     dependencies:
       esbuild: 0.25.2
       fdir: 6.4.3(picomatch@4.0.2)
@@ -730,4 +753,5 @@ snapshots:
       rollup: 4.40.0
       tinyglobby: 0.2.12
     optionalDependencies:
+      '@types/node': 24.0.10
       fsevents: 2.3.3
