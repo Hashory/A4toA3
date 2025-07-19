@@ -1,9 +1,38 @@
-# A4toA3 - PDF変換ツール
+# sv
 
-[A4toA3 - PDF変換ツール](https://a4toa3.hashory.app/)
+Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-## 概要
-A4toA3は、A4サイズのPDFの2ページ分を1枚のA3用紙に並べて配置した新しいPDFを作成するツールです。
+## Creating a project
 
-## ライセンス
-このプロジェクトは [MITライセンス](LICENSE) のもとで公開されています。
+If you're seeing this, you've probably already done this step. Congrats!
+
+```bash
+# create a new project in the current directory
+npx sv create
+
+# create a new project in my-app
+npx sv create my-app
+```
+
+## Developing
+
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+
+```bash
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
