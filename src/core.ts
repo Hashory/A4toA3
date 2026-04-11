@@ -1,10 +1,4 @@
-import {
-	degrees,
-	PageSizes,
-	PDFDocument,
-	type PDFPage,
-	type Rotation,
-} from "pdf-lib";
+import { degrees, PageSizes, PDFDocument, type PDFPage, type Rotation } from "pdf-lib";
 import { CustomError } from "ts-custom-error";
 
 /**
@@ -51,11 +45,9 @@ export async function convertA4toA3(
 	for (const page of a4Pages) {
 		const { width, height } = page.getSize();
 		const isA4Portrait =
-			Math.abs(width - A4_WIDTH) < TOLERANCE &&
-			Math.abs(height - A4_HEIGHT) < TOLERANCE;
+			Math.abs(width - A4_WIDTH) < TOLERANCE && Math.abs(height - A4_HEIGHT) < TOLERANCE;
 		const isA4Landscape =
-			Math.abs(width - A4_HEIGHT) < TOLERANCE &&
-			Math.abs(height - A4_WIDTH) < TOLERANCE;
+			Math.abs(width - A4_HEIGHT) < TOLERANCE && Math.abs(height - A4_WIDTH) < TOLERANCE;
 
 		if (!isA4Portrait && !isA4Landscape) {
 			throw new ConvertA4toA3NotA4SizeError("The PDF is not A4 size.");
@@ -150,8 +142,7 @@ export async function convertA4toA3(
 						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
 					} else {
 						await draw(back, a4Pages[i + 1], "right", "rot180"); // p2
-						if (i + 3 < pageCount)
-							await draw(back, a4Pages[i + 3], "left", "rot180"); // p4
+						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "left", "rot180"); // p4
 					}
 				}
 			}
@@ -168,8 +159,7 @@ export async function convertA4toA3(
 					const back = a3PdfDoc.addPage(a3PageSize);
 					if (isPortrait) {
 						await draw(back, a4Pages[i + 1], "left", "rot180"); // p2
-						if (i + 3 < pageCount)
-							await draw(back, a4Pages[i + 3], "right", "rot180"); // p4
+						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right", "rot180"); // p4
 					} else {
 						await draw(back, a4Pages[i + 1], "left"); // p2
 						if (i + 3 < pageCount) await draw(back, a4Pages[i + 3], "right"); // p4
