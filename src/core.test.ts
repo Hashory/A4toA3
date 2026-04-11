@@ -1,5 +1,6 @@
 import { PageSizes, PDFDocument } from "pdf-lib";
 import { describe, expect, it, vi } from "vitest";
+
 import {
 	ConvertA4toA3MismatchedOrientationError,
 	ConvertA4toA3NoPagesError,
@@ -31,18 +32,14 @@ describe("convertA4toA3", () => {
 		const loadSpy = vi.spyOn(PDFDocument, "load").mockResolvedValue(mockDoc);
 
 		const pdfBytes = new Uint8Array([]);
-		await expect(convertA4toA3(pdfBytes, "single")).rejects.toThrow(
-			ConvertA4toA3NoPagesError,
-		);
+		await expect(convertA4toA3(pdfBytes, "single")).rejects.toThrow(ConvertA4toA3NoPagesError);
 
 		loadSpy.mockRestore();
 	});
 
 	it("should throw ConvertA4toA3NotA4SizeError if the PDF is not A4 size", async () => {
 		const pdfBytes = await createDummyPdf(1, PageSizes.A3[0], PageSizes.A3[1]);
-		await expect(convertA4toA3(pdfBytes, "single")).rejects.toThrow(
-			ConvertA4toA3NotA4SizeError,
-		);
+		await expect(convertA4toA3(pdfBytes, "single")).rejects.toThrow(ConvertA4toA3NotA4SizeError);
 	});
 
 	it("should throw ConvertA4toA3MismatchedOrientationError if pages have different orientations", async () => {
@@ -58,11 +55,7 @@ describe("convertA4toA3", () => {
 
 	describe("Mode: single", () => {
 		it("should convert A4 portrait pages to A3 landscape pages correctly", async () => {
-			const pdfBytes = await createDummyPdf(
-				2,
-				PageSizes.A4[0],
-				PageSizes.A4[1],
-			);
+			const pdfBytes = await createDummyPdf(2, PageSizes.A4[0], PageSizes.A4[1]);
 			const resultBytes = await convertA4toA3(pdfBytes, "single");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -79,11 +72,7 @@ describe("convertA4toA3", () => {
 		});
 
 		it("should convert A4 landscape pages to A3 portrait pages correctly", async () => {
-			const pdfBytes = await createDummyPdf(
-				2,
-				PageSizes.A4[1],
-				PageSizes.A4[0],
-			);
+			const pdfBytes = await createDummyPdf(2, PageSizes.A4[1], PageSizes.A4[0]);
 			const resultBytes = await convertA4toA3(pdfBytes, "single");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -96,11 +85,7 @@ describe("convertA4toA3", () => {
 		});
 
 		it("should handle odd number of pages correctly in single mode", async () => {
-			const pdfBytes = await createDummyPdf(
-				3,
-				PageSizes.A4[0],
-				PageSizes.A4[1],
-			);
+			const pdfBytes = await createDummyPdf(3, PageSizes.A4[0], PageSizes.A4[1]);
 			const resultBytes = await convertA4toA3(pdfBytes, "single");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -112,11 +97,7 @@ describe("convertA4toA3", () => {
 	describe("Mode: double-long", () => {
 		it("should process double-long mode correctly (Portrait)", async () => {
 			// 4 pages -> 1 sheet (front and back) -> 2 A3 pages
-			const pdfBytes = await createDummyPdf(
-				4,
-				PageSizes.A4[0],
-				PageSizes.A4[1],
-			);
+			const pdfBytes = await createDummyPdf(4, PageSizes.A4[0], PageSizes.A4[1]);
 			const resultBytes = await convertA4toA3(pdfBytes, "double-long");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -125,11 +106,7 @@ describe("convertA4toA3", () => {
 		});
 
 		it("should process double-long mode correctly (Landscape)", async () => {
-			const pdfBytes = await createDummyPdf(
-				4,
-				PageSizes.A4[1],
-				PageSizes.A4[0],
-			);
+			const pdfBytes = await createDummyPdf(4, PageSizes.A4[1], PageSizes.A4[0]);
 			const resultBytes = await convertA4toA3(pdfBytes, "double-long");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -140,11 +117,7 @@ describe("convertA4toA3", () => {
 
 	describe("Mode: double-short", () => {
 		it("should process double-short mode correctly (Portrait)", async () => {
-			const pdfBytes = await createDummyPdf(
-				4,
-				PageSizes.A4[0],
-				PageSizes.A4[1],
-			);
+			const pdfBytes = await createDummyPdf(4, PageSizes.A4[0], PageSizes.A4[1]);
 			const resultBytes = await convertA4toA3(pdfBytes, "double-short");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
@@ -153,11 +126,7 @@ describe("convertA4toA3", () => {
 		});
 
 		it("should process double-short mode correctly (Landscape)", async () => {
-			const pdfBytes = await createDummyPdf(
-				4,
-				PageSizes.A4[1],
-				PageSizes.A4[0],
-			);
+			const pdfBytes = await createDummyPdf(4, PageSizes.A4[1], PageSizes.A4[0]);
 			const resultBytes = await convertA4toA3(pdfBytes, "double-short");
 			const resultPdf = await PDFDocument.load(resultBytes);
 			const pages = resultPdf.getPages();
