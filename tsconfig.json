@@ -1,5 +1,5 @@
 {
-	"extends": "./.svelte-kit/tsconfig.json",
+	"extends": "$app/tsconfig",
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
@@ -9,5 +9,7 @@
 		"noUnusedParameters": true,
 		"skipLibCheck": true,
 		"strict": true
-	}
+	},
+	"include": ["src", "test", "*"],
+	"exclude": ["src/service-worker"]
 }

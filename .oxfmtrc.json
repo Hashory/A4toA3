@@ -15,5 +15,6 @@
 	},
 	"sortPackageJson": {
 		"sortScripts": true
-	}
+	},
+	"svelte": true
 }

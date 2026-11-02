@@ -217,7 +217,13 @@
 		<span class="label">印刷面:</span>
 		<div class="radio-group">
 			<div class="radio-item">
-				<input id="print-single" name="print-setting" type="radio" value="single" bind:group={mode} />
+				<input
+					id="print-single"
+					name="print-setting"
+					type="radio"
+					value="single"
+					bind:group={mode}
+				/>
 				<label for="print-single">片面印刷</label>
 			</div>
 			<div class="radio-item">
@@ -259,7 +265,11 @@
 
 	{#if downloadUrl}
 		<div class="download-link">
-			<a href={downloadUrl} download={downloadFilename} onclick={() => setTimeout(revokeDownloadUrl, 100)}>
+			<a
+				href={downloadUrl}
+				download={downloadFilename}
+				onclick={() => setTimeout(revokeDownloadUrl, 100)}
+			>
 				変換されたA3 PDFをダウンロード
 			</a>
 		</div>
